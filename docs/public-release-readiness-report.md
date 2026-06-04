@@ -10,6 +10,12 @@ Published public repository URL:
 https://github.com/kan7-max/campus-flow
 ```
 
+Public GitHub profile URL:
+
+```text
+https://github.com/kan7-max
+```
+
 ## Official Requirement Mapping
 
 OpenAI's current form asks for:
@@ -62,9 +68,16 @@ git log --oneline --all
 - Export worktree is clean after generation.
 - No tracked `.env`, `.env.local`, `.vercel`, `.taskflow-demo-store*`, local agent notes, local data folders, or local verification artifacts were found in the export.
 - Secret scan for OpenAI keys, GitHub tokens, Supabase service-role values, Google client secret values, web-push private key values, cron secret values, local Windows user paths, and non-empty Obsidian vault paths returned no matches.
+- Commit author and committer identity are public-safe: `Campus Flow contributors <campusflow.official@gmail.com>`.
 - `npm ci --ignore-scripts` passed.
 - `npm run check` passed.
 - `npm audit --audit-level=moderate` passed with zero vulnerabilities.
+- GitHub secret scanning is enabled.
+- GitHub secret scanning push protection is enabled.
+- Dependabot security updates are enabled.
+- Vulnerability alerts are enabled.
+- `main` branch protection requires the `check` status context.
+- `main` branch force pushes and deletions are disabled.
 
 ## OSS Maintenance Files Present
 
@@ -80,9 +93,7 @@ git log --oneline --all
 
 ## Remaining External Steps
 
-These steps change external/public state and should only be done after explicit maintainer confirmation. Repository creation and initial publication have been completed for `kan7-max/campus-flow`.
+Repository creation, initial publication, secret scanning, push protection, Dependabot security updates, vulnerability alerts, and `main` branch protection have been completed for `kan7-max/campus-flow`.
 
-1. Confirm the GitHub profile is public.
-2. Enable GitHub secret scanning and Dependabot alerts for the public repository.
-3. Set branch protection so checks are required before merging.
-4. Fill the OpenAI form using the clean public repository URL and the OpenAI Organization ID.
+1. Get the OpenAI Organization ID from the OpenAI dashboard.
+2. Fill the OpenAI form using the clean public repository URL and the OpenAI Organization ID.

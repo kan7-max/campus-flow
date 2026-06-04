@@ -13,7 +13,7 @@ Official form: https://openai.com/form/codex-for-oss/
 
 ## Form Fields To Prepare
 
-- GitHub username: set profile visibility to public.
+- GitHub username: `kan7-max`; profile URL is publicly reachable.
 - GitHub repository URL: `https://github.com/kan7-max/campus-flow`
 - Role: primary maintainer.
 - OpenAI Organization ID: get from the OpenAI dashboard.
@@ -29,7 +29,7 @@ API credits would be used for core OSS maintenance: AI extraction evaluation, re
 
 ## Official Requirement Mapping
 
-- Public GitHub profile: must be confirmed by the applicant in GitHub settings.
+- Public GitHub profile: `https://github.com/kan7-max` is publicly reachable.
 - Public repository URL: `https://github.com/kan7-max/campus-flow`
 - Maintainer role: applicant should select `Primary maintainer` if they own and administer the repository.
 - Qualification evidence: explain active development, student-productivity domain importance, privacy/security-sensitive data handling, and Codex-supported maintainer workflows.
