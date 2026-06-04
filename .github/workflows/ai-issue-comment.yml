@@ -1,0 +1,90 @@
+name: Create Codex Prompt
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to comment on
+        required: true
+
+jobs:
+  create-codex-prompt:
+    if: github.event_name == 'workflow_dispatch' || github.event.label.name == 'codex-ready'
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Build and add Codex instruction comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueNumber = context.eventName === "workflow_dispatch"
+              ? Number(core.getInput("issue_number"))
+              : context.payload.issue.number;
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber
+            });
+
+            const body = issue.body || "";
+            const marker = `<!-- ai-ops-codex-prompt:${issue.number} -->`;
+            const prompt = [
+              marker,
+              "Codex作業をお願いします。",
+              "",
+              `対象Issue: #${issue.number} ${issue.title}`,
+              "",
+              "Issue内容:",
+              body,
+              "",
+              "共通制約:",
+              "- 大規模リファクタ禁止",
+              "- 既存UIと既存機能を壊さない",
+              "- `.env` は触らない",
+              "- Supabase migrationは勝手に適用しない",
+              "- 本番DB、RLS、課金設定、外部サービス設定は変更しない",
+              "- 課題保存を最優先",
+              "- Google Calendarや外部連携の失敗を課題保存失敗扱いにしない",
+              "- 変更は最小限にする",
+              "",
+              "完了条件:",
+              "- 変更ファイル、変更内容、検証結果、残リスクを報告",
+              "- 利用可能な場合は `npm run lint` / `npm run typecheck` / `npm run check` / `npm run build` を実行",
+              "- UI変更時はVercel Previewまたはローカル表示を確認",
+              "",
+              "PR方針:",
+              `- PR本文に \`Fixes #${issue.number}\` を入れる`,
+              "- 本番反映、DB変更、課金変更、一斉送信は人間承認まで止める"
+            ].join("\n");
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              per_page: 100
+            });
+
+            const existing = comments.find((comment) => comment.body && comment.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: prompt
+              });
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: prompt
+            });

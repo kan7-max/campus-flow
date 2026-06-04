@@ -1,0 +1,90 @@
+name: AI Improvement Task
+description: Turn feedback, errors, or product ideas into a Codex-ready task.
+title: "[AI Ops] "
+labels:
+  - needs-human-check
+body:
+  - type: dropdown
+    id: source
+    attributes:
+      label: Source
+      options:
+        - user-feedback
+        - sentry-error
+        - posthog-signal
+        - internal-memo
+        - sales-data
+        - competitive-research
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - ops
+        - bug
+        - ui
+        - mobile
+        - feature
+        - enhancement
+        - docs
+        - documentation
+        - question
+        - release-blocker
+        - other
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - priority:P0
+        - priority:P1
+        - priority:P2
+    validations:
+      required: true
+  - type: input
+    id: surface
+    attributes:
+      label: Target Surface
+      placeholder: /today, /ai, billing flow, PDF extraction, etc.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is the user pain, error, or opportunity?
+      placeholder: Users cannot quickly see the next task on mobile.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Include user quote, Sentry event, PostHog signal, revenue clue, or memo.
+  - type: textarea
+    id: todo
+    attributes:
+      label: Proposed Work
+      value: |
+        - 
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non Goals
+      value: |
+        - No large UI rewrite
+        - No production DB migration
+        - No billing setting changes
+  - type: textarea
+    id: done
+    attributes:
+      label: Done When
+      value: |
+        - Existing behavior is preserved
+        - Relevant checks pass
+        - Mobile/preview behavior is verified when UI is touched
+    validations:
+      required: true

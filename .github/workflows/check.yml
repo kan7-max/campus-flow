@@ -1,0 +1,94 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect lockfile
+        id: lockfile
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.lockfile.outputs.exists == 'true'
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            npm-shrinkwrap.json
+
+      - uses: actions/setup-node@v4
+        if: steps.lockfile.outputs.exists != 'true'
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run available checks
+        shell: bash
+        run: |
+          node <<'NODE'
+          const { execFileSync } = require("node:child_process");
+          const fs = require("node:fs");
+          const path = require("node:path");
+
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          const scripts = pkg.scripts || {};
+          const checks = ["lint", "typecheck", "check", "build"];
+          let ran = 0;
+
+          for (const name of checks) {
+            if (!scripts[name]) {
+              console.log(`[skip] npm run ${name} (missing script)`);
+              continue;
+            }
+            console.log(`[run] npm run ${name}`);
+            execFileSync("npm", ["run", name], { stdio: "inherit" });
+            ran += 1;
+          }
+
+          function walk(dir) {
+            if (!fs.existsSync(dir)) return [];
+            const out = [];
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) out.push(...walk(full));
+              else if (/\.(mjs|cjs|js)$/.test(entry.name)) out.push(full);
+            }
+            return out;
+          }
+
+          if (ran === 0) {
+            const files = walk("src").concat(walk("scripts")).filter((file) => fs.existsSync(file));
+            for (const file of files) {
+              console.log(`[syntax] ${file}`);
+              execFileSync(process.execPath, ["--check", file], { stdio: "inherit" });
+            }
+          }
+          NODE

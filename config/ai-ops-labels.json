@@ -1,0 +1,19 @@
+{
+  "labels": [
+    { "name": "bug", "color": "d73a4a", "description": "Something isn't working" },
+    { "name": "codex-ready", "color": "b60205", "description": "codexに投げてよい" },
+    { "name": "docs", "color": "7057ff", "description": "ドキュメント" },
+    { "name": "documentation", "color": "0075ca", "description": "Improvements or additions to documentation" },
+    { "name": "enhancement", "color": "a2eeef", "description": "New feature or request" },
+    { "name": "feature", "color": "5319e7", "description": "機能追加" },
+    { "name": "mobile", "color": "d4c5f9", "description": "スマホ表示" },
+    { "name": "needs-human-check", "color": "0e8a16", "description": "人間の確認が必要" },
+    { "name": "ops", "color": "0e8a16", "description": "運営、管理系" },
+    { "name": "priority:P0", "color": "5319e7", "description": "今すぐ対応" },
+    { "name": "priority:P1", "color": "1d76db", "description": "重要" },
+    { "name": "priority:P2", "color": "006b75", "description": "後でよい" },
+    { "name": "question", "color": "d876e3", "description": "Further information is requested" },
+    { "name": "release-blocker", "color": "008672", "description": "リリース前に必須" },
+    { "name": "ui", "color": "1d76db", "description": "UI改善" }
+  ]
+}
