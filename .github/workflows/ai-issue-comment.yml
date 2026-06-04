@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Build and add Codex instruction comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const issueNumber = context.eventName === "workflow_dispatch"
