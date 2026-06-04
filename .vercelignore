@@ -1,0 +1,16 @@
+.git
+.next
+.next-qa*
+node_modules
+coverage
+
+# Local QA artifacts
+docs/release-reports
+docs/update-memos
+docs/release-go-shortest-path.md
+docs/release-manual-copypaste-short.md
+pdf_extract_result.json
+.tmp-git-backup
+
+# Local-only folders
+Campus flow

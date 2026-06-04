@@ -1,0 +1,140 @@
+name: AI Issue Ingest
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: Issue title
+        required: false
+      source:
+        description: Source of the signal
+        required: false
+        default: manual
+      kind:
+        description: Label such as ops, bug, ui, mobile, feature, docs
+        required: false
+        default: ops
+      priority:
+        description: priority:P0, priority:P1, or priority:P2
+        required: false
+        default: priority:P1
+      summary:
+        description: Short summary
+        required: true
+      evidence:
+        description: Evidence, logs, quotes, or notes
+        required: false
+      proposed_work:
+        description: Proposed implementation notes
+        required: false
+  repository_dispatch:
+    types: [ai_ops_signal]
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Create human-gated AI Ops issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allowedLabels = new Set([
+              "bug",
+              "codex-ready",
+              "docs",
+              "documentation",
+              "enhancement",
+              "feature",
+              "mobile",
+              "needs-human-check",
+              "ops",
+              "priority:P0",
+              "priority:P1",
+              "priority:P2",
+              "question",
+              "release-blocker",
+              "ui"
+            ]);
+
+            const inputPayload = context.eventName === "repository_dispatch"
+              ? context.payload.client_payload || {}
+              : {
+                  title: core.getInput("title"),
+                  source: core.getInput("source"),
+                  kind: core.getInput("kind"),
+                  priority: core.getInput("priority"),
+                  summary: core.getInput("summary"),
+                  evidence: core.getInput("evidence"),
+                  proposed_work: core.getInput("proposed_work")
+                };
+
+            const compact = (value, max = 80) => {
+              const text = String(value || "").replace(/\s+/g, " ").trim();
+              return text.length > max ? `${text.slice(0, max - 1)}...` : text;
+            };
+
+            const source = compact(inputPayload.source || "external", 60);
+            const kind = compact(inputPayload.kind || "ops", 40);
+            const priority = compact(inputPayload.priority || "priority:P1", 40);
+            const summary = String(inputPayload.summary || "").trim();
+            const evidence = String(inputPayload.evidence || "").trim();
+            const proposedWork = String(inputPayload.proposed_work || inputPayload.proposedWork || "").trim();
+            const title = compact(inputPayload.title || `[AI Ops] ${summary || kind || source}`, 120);
+
+            if (!summary) {
+              core.setFailed("summary is required");
+              return;
+            }
+
+            const labels = Array.from(new Set(["needs-human-check", kind, priority]))
+              .filter((label) => allowedLabels.has(label) && label !== "codex-ready");
+
+            const body = [
+              "## 概要",
+              summary,
+              "",
+              "## 種別",
+              kind,
+              "",
+              "## 重要度",
+              priority,
+              "",
+              "## 入力ソース",
+              source,
+              "",
+              "## 根拠",
+              evidence || "未入力",
+              "",
+              "## やること",
+              proposedWork || "- 既存仕様への影響を確認する\n- 最小変更で修正または改善する",
+              "",
+              "## やらないこと",
+              "- 大規模リファクタ",
+              "- 本番DB migration",
+              "- RLS変更",
+              "- 課金設定変更",
+              "- 外部サービス設定変更",
+              "",
+              "## 完了条件",
+              "- 利用可能な検証コマンドが通る",
+              "- 変更内容と残リスクがPRに書かれている",
+              "- UI変更時はPreviewまたはローカル表示を確認済み",
+              "",
+              "## Codex投入判定",
+              "人間確認後に `codex-ready` を付ける"
+            ].join("\n");
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels
+            });
+
+            core.notice(`Created issue #${issue.number}: ${issue.html_url}`);
